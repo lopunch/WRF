@@ -20,6 +20,7 @@ WRFVAR_OBJS = \
    da_polaramv.o \
    da_ships.o \
    da_synop.o \
+   da_varbc_synop.o \
    da_sound.o \
    da_mtgirs.o \
    da_tamdar.o \
