@@ -237,6 +237,11 @@ subroutine da_get_innov_vector (it, num_qcstat_conv, ob, iv, grid, config_flags)
        if (it == 1) call da_varbc_tamdar_precond(iv)
    end if
 
+   if (.not. anal_type_verify .and. use_varbc_synop) then
+       call da_varbc_synop_direct(iv,ob)
+       if (it == 1) call da_varbc_synop_precond(iv)
+   end if
+
    if ( use_rainobs .and. num_fgat_time > 1 .and. var4d) then
       deallocate (hr_rainc )
       deallocate (hr_rainnc)

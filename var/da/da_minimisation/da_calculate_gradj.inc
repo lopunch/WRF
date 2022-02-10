@@ -1,5 +1,5 @@
 subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size_jp, &
-                              cv_size_jl, cv_size_jt, xbx, be, iv, cv, y, grad, grid, config_flags, re )
+                              cv_size_jl, cv_size_jt, cv_size_jsp, xbx, be, iv, cv, y, grad, grid, config_flags, re )
 
    !---------------------------------------------------------------------------
    ! Purpose: Calculates the gradient of the cost function w/r to cv
@@ -15,7 +15,7 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    integer, intent(in)                :: it     ! external iteration #.
    integer, intent(in)                :: iter   ! internal iteration #.
    integer, intent(in)                :: cv_size    ! Total cv size.
-   integer, intent(in)                :: cv_size_jb, cv_size_je, cv_size_jp, cv_size_jl, cv_size_jt
+   integer, intent(in)                :: cv_size_jb, cv_size_je, cv_size_jp, cv_size_jl, cv_size_jt, cv_size_jsp
    type (xbx_type),intent(inout)      :: xbx    ! For header & non-grid arrays.
    type (be_type), intent(in)         :: be     ! background error structure.
    type (iv_type), intent(inout)      :: iv     ! innovation vector (o-b).
@@ -30,6 +30,7 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    integer          :: je_start, je_end             ! Start/end indices of Je.
    integer          :: jl_start, jl_end             ! Start/end indices of Jl.
    integer          :: jt_start, jt_end, iphase
+   integer          :: jsp_start, jsp_end
    real             :: jo_partial                   ! jo for this processor
    type (y_type)    :: jo_grad_y                    ! Grad_y(jo)
    real             :: grad_jo(cv_size)
@@ -41,7 +42,8 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    real             :: grad_jl(cv_size)
    real             :: grad_jm(cv_size)
    real             :: grad_jt(cv_size)
-   real             :: gnorm_j, gnorm_jo, gnorm_jb, gnorm_je, gnorm_jd, gnorm_jp, gnorm_js, gnorm_jl, gnorm_jt
+   real             :: grad_jsp(cv_size)
+   real             :: gnorm_j, gnorm_jo, gnorm_jb, gnorm_je, gnorm_jd, gnorm_jp, gnorm_js, gnorm_jl, gnorm_jt, gnorm_jsp
    real             :: gnorm_jm
    logical          :: jcdf_flag
 
@@ -52,6 +54,7 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    integer                           :: inst, ichan, npred, ipred, id
    real                              :: bgerr
    integer                           :: n
+   real,  allocatable                :: tmp(:)
 
    if (trace_use) call da_trace_entry("da_calculate_gradj")
 
@@ -66,6 +69,8 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    jl_end     = cv_size_jb + cv_size_je + cv_size_jp + cv_size_jl
    jt_start   = jl_end + 1
    jt_end     = jl_end + cv_size_jt
+   jsp_start  = jt_end + 1
+   jsp_end    = jt_end + cv_size_jsp
 
    grad_jo = 0.0
    grad_jb = 0.0
@@ -76,6 +81,7 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
    grad_jl = 0.0
    grad_jm = 0.0
    grad_jt = 0.0
+   grad_jsp = 0.0
 
    inc_div = 0.0
 
@@ -258,17 +264,116 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
        end do
    end if
 
+   !-------------------------------------------------------------------------
+   ! [n.n+1] calculate grad_sp (jsp):
+   !-------------------------------------------------------------------------
+
+
+   if (cv_size_jsp > 0) then
+!      if (iv%varbc_synop%u%nobs > 0) then
+           npred = iv%varbc_synop%u%npred
+           allocate(tmp(npred))   !yclo test
+           do ipred = 1, npred
+              id     = iv%varbc_synop%u%index(ipred)
+              bgerr  = iv%varbc_synop%u%bgerr(ipred)
+!             if (bgerr > 0.0) &
+!                 grad_jsp(id) = (1/sqrt(bgerr)) * SUM(cv(id) * &
+!                         iv%varbc_synop%u%vtox(ipred,1:npred))
+              if (bgerr > 0.0) then
+                 do ichan = 1, npred
+                    tmp(ichan) = 1.0 / bgerr * SUM( &
+                        cv(iv%varbc_synop%u%index(1:npred)) * &
+                        iv%varbc_synop%u%vtox(ichan,1:npred) )
+                 end do
+
+                 grad_jsp(id) = SUM(tmp(1:npred) * &
+                     iv%varbc_synop%u%vtox(ipred,1:npred))
+              end if
+           end do
+           deallocate(tmp)
+!      end if
+
+!      if (iv%varbc_synop%v%nobs > 0) then
+           npred = iv%varbc_synop%v%npred
+           allocate(tmp(npred))   !yclo test
+           do ipred = 1, npred
+              id     = iv%varbc_synop%v%index(ipred)
+              bgerr  = iv%varbc_synop%v%bgerr(ipred)
+!             if (bgerr > 0.0) &
+!                 grad_jsp(id) = (1/sqrt(bgerr)) * SUM(cv(id) * &
+!                         iv%varbc_synop%v%vtox(ipred,1:npred))
+              if (bgerr > 0.0) then
+                 do ichan = 1, npred
+                    tmp(ichan) = 1.0 / bgerr * SUM( &
+                        cv(iv%varbc_synop%v%index(1:npred)) * &
+                        iv%varbc_synop%v%vtox(ichan,1:npred) )
+                 end do
+
+                 grad_jsp(id) = SUM(tmp(1:npred) * &
+                     iv%varbc_synop%v%vtox(ipred,1:npred))
+              end if
+           end do
+           deallocate(tmp)
+!      end if
+
+!      if (iv%varbc_synop%t%nobs > 0) then
+           npred = iv%varbc_synop%t%npred
+           allocate(tmp(npred))   !yclo test
+           do ipred = 1, npred
+              id     = iv%varbc_synop%t%index(ipred)
+              bgerr  = iv%varbc_synop%t%bgerr(ipred)
+!             if (bgerr > 0.0) &
+!                 grad_jsp(id) = (1/sqrt(bgerr)) * SUM(cv(id) * &
+!                         iv%varbc_synop%t%vtox(ipred,1:npred))
+              if (bgerr > 0.0) then
+                 do ichan = 1, npred
+                    tmp(ichan) = 1.0 / bgerr * SUM( &
+                        cv(iv%varbc_synop%t%index(1:npred)) * &
+                        iv%varbc_synop%t%vtox(ichan,1:npred) )
+                 end do
+
+                 grad_jsp(id) = SUM(tmp(1:npred) * &
+                     iv%varbc_synop%t%vtox(ipred,1:npred))
+              end if
+           end do
+           deallocate(tmp)
+!      end if
+
+!      if (iv%varbc_synop%q%nobs > 0) then
+           npred = iv%varbc_synop%q%npred
+           allocate(tmp(npred))   !yclo test
+           do ipred = 1, npred
+              id     = iv%varbc_synop%q%index(ipred)
+              bgerr  = iv%varbc_synop%q%bgerr(ipred)
+!             if (bgerr > 0.0) &
+!                 grad_jsp(id) = (1/sqrt(bgerr)) * SUM(cv(id) * &
+!                         iv%varbc_synop%q%vtox(ipred,1:npred))
+              if (bgerr > 0.0) then
+                 do ichan = 1, npred
+                    tmp(ichan) = 1.0 / bgerr * SUM( &
+                        cv(iv%varbc_synop%q%index(1:npred)) * &
+                        iv%varbc_synop%q%vtox(ichan,1:npred) )
+                 end do
+
+                 grad_jsp(id) = SUM(tmp(1:npred) * &
+                     iv%varbc_synop%q%vtox(ipred,1:npred))
+              end if
+           end do
+           deallocate(tmp)
+!      end if
+   end if
+
    !--------------------------------------------------------------------------------------------------
    ! [7.0] calculate grad_v (j) = grad_v (jb) + grad_v (jo) + grad_v (je) + grad_v (jd) + grad_v (jp) + grad_v (js) + grad_v (jl)
    !--------------------------------------------------------------------------------------------------   
-   grad = grad_jo + grad_jb + grad_je + grad_jd + grad_jp + grad_js + grad_jl + grad_jm + grad_jt
+   grad = grad_jo + grad_jb + grad_je + grad_jd + grad_jp + grad_js + grad_jl + grad_jm + grad_jt + grad_jsp
 
    !-------------------------------------------------------------------------
    ! [8.0] write Gradient:
    !-------------------------------------------------------------------------
    if (rootproc) then
       if (it == 1 .and. iter == 0) then
-         write(unit=grad_unit,fmt='(a)')'Outer    EPS     Inner      G           Gb       Go           Ge         Gd         Gp         Gs        Gl         Gm         Gt'
+         write(unit=grad_unit,fmt='(a)')'Outer    EPS     Inner      G           Gb       Go           Ge         Gd         Gp         Gs        Gl         Gm         Gt         Gsp'
          write(unit=grad_unit,fmt='(a)')'Iter             Iter                            '
       end if
    end if
@@ -285,6 +390,7 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
       gnorm_jl = sqrt(da_dot_cv(cv_size, grad_jl, grad_jl, grid, be%cv_mz, be%ncv_mz))
       gnorm_jm = sqrt(da_dot_cv(cv_size, grad_jm, grad_jm, grid, be%cv_mz, be%ncv_mz))
       gnorm_jt = sqrt(da_dot_cv(cv_size, grad_jt, grad_jt, grid, be%cv_mz, be%ncv_mz))
+      gnorm_jsp = sqrt(da_dot_cv(cv_size, grad_jsp, grad_jsp, grid, be%cv_mz, be%ncv_mz))
 #else
       gnorm_j  = sqrt(da_dot_cv(cv_size, grad,    grad,    grid, be%cv_mz, be%ncv_mz,be%cv_mz_chemic, jp_start, jp_end))
       gnorm_jo = sqrt(da_dot_cv(cv_size, grad_jo, grad_jo, grid, be%cv_mz, be%ncv_mz,be%cv_mz_chemic))
@@ -297,8 +403,8 @@ subroutine da_calculate_gradj(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size
 #endif
 
       if (rootproc) &
-         write(grad_unit,fmt='(2x,i2,1x,e10.3,2x,i4,10(1x,f10.3))') &
-               it, eps(it), iter, gnorm_j, gnorm_jb, gnorm_jo, gnorm_je, gnorm_jd, gnorm_jp, gnorm_js, gnorm_jl, gnorm_jm, gnorm_jt
+         write(grad_unit,fmt='(2x,i2,1x,e10.3,2x,i4,11(1x,f10.3))') &
+               it, eps(it), iter, gnorm_j, gnorm_jb, gnorm_jo, gnorm_je, gnorm_jd, gnorm_jp, gnorm_js, gnorm_jl, gnorm_jm, gnorm_jt, gnorm_jsp
    end if
 
    if (trace_use) call da_trace_exit("da_calculate_gradj")

@@ -1,5 +1,5 @@
 subroutine da_calculate_j(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size_jp, &
-                           cv_size_jl, cv_size_jt, xbx, be, iv, xhat, cv, &
+                           cv_size_jl, cv_size_jt, cv_size_jsp, xbx, be, iv, xhat, cv, &
                            re, y, j, grid, config_flags                     )
 
    !---------------------------------------------------------------------------
@@ -16,6 +16,7 @@ subroutine da_calculate_j(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size_jp,
    integer, intent(in)                :: cv_size_jp ! Jp cv size.
    integer, intent(in)                :: cv_size_jl ! Jl cv size.
    integer, intent(in)                :: cv_size_jt ! Jt cv size.
+   integer, intent(in)                :: cv_size_jsp! Jsp cv size.
    type (xbx_type),intent(inout)      :: xbx    ! For header & non-grid arrays.
    type (be_type), intent(in)         :: be     ! background error structure.
    type (iv_type), intent(inout)      :: iv     ! innovation vector (o-b).
@@ -31,10 +32,11 @@ subroutine da_calculate_j(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size_jp,
    integer          :: je_start, je_end             ! Start/end indices of Je.
    integer          :: jl_start, jl_end             ! Start/end indices of Je.
    integer          :: jt_start, jt_end, iphase
+   integer          :: jsp_start, jsp_end
    real             :: jo_partial                   ! jo for this processor
    type (y_type)    :: jo_grad_y ! Grad_y(jo)
    real             :: cv_xhat_jb(cv_size_jb), cv_xhat_je(cv_size_je), cv_xhat_jl(cv_size_jl), &
-                       cv_xhat_jt(cv_size_jt)
+                       cv_xhat_jt(cv_size_jt), cv_xhat_jsp(cv_size_jsp)
    integer          :: ndynopt
    real             :: dtemp1x
    integer          :: i, jj, k
@@ -46,12 +48,14 @@ subroutine da_calculate_j(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size_jp,
    integer                           :: inst, ichan, npred, ipred, id
    real                              :: bgerr, gnorm_jp  
    real                              :: gnorm_jt
+   real                              :: gnorm_jsp
     
    integer                           :: n, cldtoplevel(1), icld, nclouds, ncv, minlev_cld
    real                              :: jd_local
    real                              :: js_local
    real                              :: jm_local
    real                              :: jt_local
+   real                              :: jsp_local
    real, allocatable                 :: cc(:)
 
    real                              :: inc_div(ims:ime,jms:jme,kms:kme)
@@ -69,6 +73,9 @@ subroutine da_calculate_j(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size_jp,
    jl_end   = cv_size_jb + cv_size_je + cv_size_jp + cv_size_jl
    jt_start = jl_end + 1
    jt_end   = jl_end + cv_size_jt
+   jsp_start = jt_end + 1
+   jsp_end   = jt_end + cv_size_jsp
+
 
    inc_div = 0.0
 
@@ -360,11 +367,80 @@ subroutine da_calculate_j(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size_jp,
    end if
    j % jt  = wrf_dm_sum_real(jt_local)
 
-   !-------------------------------------------------------------------------------
-   ! [7.0] calculate total cost function j = jo + jb + jc + je + jd + jp + js + jt:
-   !-------------------------------------------------------------------------------
+   !-------------------------------------------------------------------------
+   ! [n.n+1] calculate jsp:
+   !-------------------------------------------------------------------------
 
-   j % total = j % jb + j % jo % total + j % je + j % jd + j % jp + j % js + j % jm + j % jt
+   j % jsp = 0.0
+   jsp_local = 0.0
+   if (cv_size_jsp > 0) then
+
+       cv_xhat_jsp = 0.0
+
+!      if (iv%varbc_synop%u%nobs > 0) then
+           npred = iv%varbc_synop%u%npred
+           do ipred = 1, npred
+              id     = iv%varbc_synop%u%index(ipred)
+              bgerr  = iv%varbc_synop%u%bgerr(ipred)
+              if (bgerr > 0.0) &
+                  cv_xhat_jsp(id-jsp_start+1) = (1/sqrt(bgerr)) * &
+                  SUM( (cv  (iv%varbc_synop%u%index(1:npred))  + &
+                        xhat(iv%varbc_synop%u%index(1:npred))) * &
+                        iv%varbc_synop%u%vtox(ipred,1:npred) )
+!                 SUM( (cv(id)+xhat(id)) * iv%varbc_synop%u%vtox(ipred,1:npred) )
+           end do
+!      end if
+
+!      if (iv%varbc_synop%v%nobs > 0) then
+           npred = iv%varbc_synop%v%npred
+           do ipred = 1, npred
+              id     = iv%varbc_synop%v%index(ipred)
+              bgerr  = iv%varbc_synop%v%bgerr(ipred)
+              if (bgerr > 0.0) &
+                  cv_xhat_jsp(id-jsp_start+1) = (1/sqrt(bgerr)) * &
+                  SUM( (cv  (iv%varbc_synop%v%index(1:npred))  + &
+                        xhat(iv%varbc_synop%v%index(1:npred))) * &
+                        iv%varbc_synop%v%vtox(ipred,1:npred) )
+!                 SUM( (cv(id)+xhat(id)) * iv%varbc_synop%v%vtox(ipred,1:npred) )
+           end do
+!      end if
+
+!      if (iv%varbc_synop%t%nobs > 0) then
+           npred = iv%varbc_synop%t%npred
+           do ipred = 1, npred
+              id     = iv%varbc_synop%t%index(ipred)
+              bgerr  = iv%varbc_synop%t%bgerr(ipred)
+              if (bgerr > 0.0) &
+                  cv_xhat_jsp(id-jsp_start+1) = (1/sqrt(bgerr)) * &
+                  SUM( (cv  (iv%varbc_synop%t%index(1:npred))  + &
+                        xhat(iv%varbc_synop%t%index(1:npred))) * &
+                        iv%varbc_synop%t%vtox(ipred,1:npred) )
+!                 SUM( (cv(id)+xhat(id)) * iv%varbc_synop%t%vtox(ipred,1:npred) )
+           end do
+!      end if
+
+!      if (iv%varbc_synop%q%nobs > 0) then
+           npred = iv%varbc_synop%q%npred
+           do ipred = 1, npred
+              id     = iv%varbc_synop%q%index(ipred)
+              bgerr  = iv%varbc_synop%q%bgerr(ipred)
+              if (bgerr > 0.0) &
+                  cv_xhat_jsp(id-jsp_start+1) = (1/sqrt(bgerr)) * &
+                  SUM( (cv  (iv%varbc_synop%q%index(1:npred))  + &
+                        xhat(iv%varbc_synop%q%index(1:npred))) * &
+                        iv%varbc_synop%q%vtox(ipred,1:npred) )
+!                 SUM( (cv(id)+xhat(id)) * iv%varbc_synop%q%vtox(ipred,1:npred) )
+           end do
+!      end if
+       jsp_local = 0.5 * da_dot(cv_size_jsp, cv_xhat_jsp, cv_xhat_jsp)
+   end if
+   j % jsp  = wrf_dm_sum_real(jsp_local)
+
+   !-------------------------------------------------------------------------------------
+   ! [7.0] calculate total cost function j = jo + jb + jc + je + jd + jp + js + jt + jsp:
+   !-------------------------------------------------------------------------------------
+
+   j % total = j % jb + j % jo % total + j % je + j % jd + j % jp + j % js + j % jm + j % jt + j % jsp
    if (grid%jcdfi_use) j % total = j % total  + j % jc
    if (var4d) j % total = j % total  + j % jl
 
@@ -373,12 +449,12 @@ subroutine da_calculate_j(it, iter, cv_size, cv_size_jb, cv_size_je, cv_size_jp,
    !-------------------------------------------------------------------------
    if (rootproc) then
       if (it == 1 .and. iter == 0) then
-         write(unit=cost_unit,fmt='(a)')'Outer    EPS     Inner      J           Jb       Jo           Jc         Je         Jd         Jp         Js        Jl         Jm         Jt'
+         write(unit=cost_unit,fmt='(a)')'Outer    EPS     Inner      J           Jb       Jo           Jc         Je         Jd         Jp         Js        Jl         Jm         Jt         Jsp'
          write(unit=cost_unit,fmt='(a)')'Iter             Iter                            '
       end if
 
-      write(unit=cost_unit,fmt='(2x,i2,1x,e10.3,2x,i4,11(1x,f10.3))') &
-         it, EPS(it), iter, j % total, j % jb, j % jo % total, j % jc, j % je, j % jd, j % jp, j%js, j%jl, j%jm, j%jt
+      write(unit=cost_unit,fmt='(2x,i2,1x,e10.3,2x,i4,12(1x,f10.3))') &
+         it, EPS(it), iter, j % total, j % jb, j % jo % total, j % jc, j % je, j % jd, j % jp, j%js, j%jl, j%jm, j%jt, j%jsp
    end if
 
    call da_deallocate_y (jo_grad_y)

@@ -462,6 +462,27 @@ module da_define_structures
       real                  , pointer :: vtox(:,:,:,:)! Transformation of CV
    end type varbc_tamdar_type
 
+   type varbc_each_var_synop
+      integer                         :: nmaxpred   ! Max. No. of predictors
+      integer                         :: npred      ! No. of predictors
+      integer                         :: nobs       ! Obs No. in proc
+      integer                         :: nobs_sum   ! Total Obs No.
+      integer               , pointer :: index (:)  ! Index in CV
+      integer               , pointer :: obs_sn(:)  ! Serial No. of Obs in proc
+      real                  , pointer :: pred  (:,:)! Predictors( [ npred, nobs ] )
+      real                  , pointer :: param (:)  ! Parameters( [ npred ] )
+      real                  , pointer :: bgerr (:)  ! Bkg err in Hessian
+      real                  , pointer :: vtox(:,:)  ! Transformation of CV
+   end type varbc_each_var_synop 
+       
+   type varbc_synop_type
+      character(len=40)               :: fmt_param    ! Format of parameter table
+      type(varbc_each_var_synop)      :: u
+      type(varbc_each_var_synop)      :: v
+      type(varbc_each_var_synop)      :: t
+      type(varbc_each_var_synop)      :: q
+   end type varbc_synop_type
+
    type airsr_type
       real                  , pointer :: h        (:) ! Height in m
       real                  , pointer :: p        (:) ! pressure.
@@ -741,6 +762,7 @@ module da_define_structures
 #endif
 
       type (varbc_tamdar_type) :: varbc_tamdar
+      type (varbc_synop_type)  :: varbc_synop
 
       real :: missing
       real :: ptop
@@ -1055,6 +1077,7 @@ module da_define_structures
       real             :: jd
       real             :: jm
       real             :: jt
+      real             :: jsp
       type (jo_type)   :: jo
    end type j_type
 
@@ -1066,6 +1089,7 @@ module da_define_structures
       integer :: size_js     ! Size of CV array for Js term.
       integer :: size_jl     ! Size of CV array for Jl term.
       integer :: size_jt     ! Size of CV array for Jt term.
+      integer :: size_jsp    ! Size of CV array for Jsp term.
       integer :: size1c      ! Complex size of CV array of 1st variable error.
       integer :: size2c      ! Complex size of CV array of 2nd variable error.
       integer :: size3c      ! Complex size of CV array of 3rd variable error.

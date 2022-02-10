@@ -487,6 +487,7 @@
    be % cv % size_js = 0
    be % cv % size_jl = 0
    be % cv % size_jt = 0
+   be % cv % size_jsp = 0
    
    !---------------------------------------------------------------------------
    ! [5.1] Set up background errors (be):
@@ -529,6 +530,18 @@
    end if
    if (use_varbc_tamdar) call da_varbc_tamdar_pred(iv, be, ob)
 
+   if (use_synopobs .and. use_varbc_synop) then
+        call da_varbc_synop_init(iv)
+   else
+        use_varbc_synop = .false.
+   end if
+   if (use_varbc_synop) then
+       iv%info(synop)%n1 = 1
+       iv%info(synop)%n2 = iv%info(synop)%nlocal
+       call da_varbc_synop_pred(grid, iv, be, ob)
+   end if    
+
+
    !---------------------------------------------------------------------------
    ! [5.3] Set up satellite control variable:
    !---------------------------------------------------------------------------
@@ -539,7 +552,8 @@
    !---------------------------------------------------------------------------
    ! [5.4] Total control variable:
    !---------------------------------------------------------------------------   
-   be % cv % size = be%cv%size_jb + be%cv%size_je + be%cv%size_jp + be%cv%size_js + be%cv%size_jl + be%cv%size_jt
+   be % cv % size = be%cv%size_jb + be%cv%size_je + be%cv%size_jp + be%cv%size_js + be%cv%size_jl + be%cv%size_jt + &
+                    be%cv%size_jsp
    cv_size = be % cv % size
 
    !---------------------------------------------------------------------------
@@ -960,7 +974,7 @@
                              be,iv,xhat,qhat,cvt,re,y,j,eignvec,eignval,neign)
           ! Output Cost Function
             call da_calculate_j(it, 1, cv_size, be%cv%size_jb, be%cv%size_je, be%cv%size_jp, &
-                             be%cv%size_jl, be%cv%size_jt, xbx, be, iv, xhat, cvt, re, y, j, grid, config_flags )
+                             be%cv%size_jl, be%cv%size_jt, be%cv%size_jsp, xbx, be, iv, xhat, cvt, re, y, j, grid, config_flags )
 
          else
             call da_minimise_lz(grid, config_flags, it, cv_size, xbx,& 
@@ -1078,6 +1092,8 @@
 
       if (use_varbc_tamdar) &
          call da_varbc_tamdar_update(cv_size, xhat, iv)
+      if (use_varbc_synop) &
+         call da_varbc_synop_update(cv_size, xhat, iv)
 
       !------------------------------------------------------------------------
       ! [8.10] Output WRFVAR analysis and analysis increments:
@@ -1208,6 +1224,37 @@
       deallocate (iv%varbc_tamdar%bgerr)
       deallocate (iv%varbc_tamdar%vtox)
    end if
+
+   if (use_varbc_synop) then
+      deallocate (iv%varbc_synop%u%index)
+      deallocate (iv%varbc_synop%u%obs_sn)
+      deallocate (iv%varbc_synop%u%pred)
+      deallocate (iv%varbc_synop%u%param)
+      deallocate (iv%varbc_synop%u%bgerr)
+      deallocate (iv%varbc_synop%u%vtox)
+
+      deallocate (iv%varbc_synop%v%index)
+      deallocate (iv%varbc_synop%v%obs_sn)
+      deallocate (iv%varbc_synop%v%pred)
+      deallocate (iv%varbc_synop%v%param)
+      deallocate (iv%varbc_synop%v%bgerr)
+      deallocate (iv%varbc_synop%v%vtox)
+
+      deallocate (iv%varbc_synop%t%index)
+      deallocate (iv%varbc_synop%t%obs_sn)
+      deallocate (iv%varbc_synop%t%pred)
+      deallocate (iv%varbc_synop%t%param)
+      deallocate (iv%varbc_synop%t%bgerr)
+      deallocate (iv%varbc_synop%t%vtox)
+
+      deallocate (iv%varbc_synop%q%index)
+      deallocate (iv%varbc_synop%q%obs_sn)
+      deallocate (iv%varbc_synop%q%pred)
+      deallocate (iv%varbc_synop%q%param)
+      deallocate (iv%varbc_synop%q%bgerr)
+      deallocate (iv%varbc_synop%q%vtox)
+   end if
+
 
    deallocate ( c1f )
    deallocate ( c2f )

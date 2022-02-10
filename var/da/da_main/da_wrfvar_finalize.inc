@@ -85,6 +85,10 @@ subroutine da_wrfvar_finalize
           close (varbc_tamdar_unit)
           call da_free_unit (varbc_tamdar_unit)
       end if
+      if (use_varbc_synop) then
+          close (varbc_synop_unit)
+          call da_free_unit (varbc_synop_unit)
+      end if
    end if
 
 #ifdef CRTM

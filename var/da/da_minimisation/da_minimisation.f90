@@ -50,6 +50,7 @@ module da_minimisation
       var_scaling4,var_scaling5,var_scaling3, jo_unit, test_gradient, &
       print_detail_grad,omb_set_rand,grad_unit,cost_unit, num_pseudo, cv_options, &
       cv_size_domain_je,cv_size_domain_jb, cv_size_domain_jp, cv_size_domain_js, cv_size_domain_jl, cv_size_domain_jt, &
+      cv_size_domain_jsp, &
 #if (WRF_CHEM == 1)
       chemic_surf, chemicda_opt, &
 #endif
@@ -68,7 +69,8 @@ module da_minimisation
       cloud_cv_options, use_cv_w, var_scaling6, var_scaling7, var_scaling8, var_scaling9, &
       var_scaling10, var_scaling11, &
       write_gts_omb_oma, write_unpert_obs, write_rej_obs_conv, pseudo_time, &
-      use_varbc_tamdar, varbc_tamdar_nobsmin, varbc_tamdar_unit
+      use_varbc_tamdar, varbc_tamdar_nobsmin, varbc_tamdar_unit, &
+      use_varbc_synop, varbc_synop_nobsmin, varbc_synop_unit
    use da_define_structures, only : iv_type, y_type,  j_type, be_type, &
 #if (WRF_CHEM == 1)
       da_allocate_y_chem_sfc, da_zero_xchem_type, da_deallocate_y_chem_sfc, &
@@ -128,6 +130,8 @@ module da_minimisation
       da_jo_and_grady_tamdar_sfc, da_residual_tamdar_sfc
    use da_varbc_tamdar, only : da_varbc_tamdar_tl,da_varbc_tamdar_adj, &
                                da_varbc_tamdar_direct,da_varbc_tamdar_precond
+   use da_varbc_synop, only : da_varbc_synop_tl,da_varbc_synop_adj, &
+                               da_varbc_synop_direct,da_varbc_synop_precond
 
 #if defined(RTTOV) || defined(CRTM)
    use da_radiance, only : da_calculate_grady_rad, da_write_filtered_rad, &

@@ -278,6 +278,7 @@ subroutine da_transform_vtoy_adj(cv_size, be, ep, cv, iv, vp, vv, xbx, y, &
 #endif
 
    if (use_varbc_tamdar) call da_varbc_tamdar_adj(cv_size, cv, iv, y)
+   if (use_varbc_synop)  call da_varbc_synop_adj(cv_size, cv, iv, y)
 
    if (trace_use) call da_trace_exit("da_transform_vtoy_adj")
 

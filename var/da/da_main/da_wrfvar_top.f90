@@ -100,7 +100,7 @@ module da_wrfvar_top
 
    use da_tools, only : map_info,map_info_ens,proj_merc, proj_ps,proj_lc,proj_latlon, &
       da_llxy_default,da_llxy_wrf,da_xyll,da_diff_seconds,da_map_set, &
-      da_set_boundary_xb,da_togrid
+      da_set_boundary_xb,da_togrid, da_sfc_hori_interp_weights
 
 #ifdef CRTM
    use module_radiance, only : crtm_destroy
@@ -131,6 +131,8 @@ module da_wrfvar_top
 
    use da_varbc_tamdar, only : da_varbc_tamdar_init, da_varbc_tamdar_pred, &
                                da_varbc_tamdar_update
+   use da_varbc_synop,  only : da_varbc_synop_init, da_varbc_synop_pred, &
+                               da_varbc_synop_update
 
    use da_wrf_interfaces
 

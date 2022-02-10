@@ -292,6 +292,10 @@ subroutine da_wrfvar_init2
           call da_get_unit (varbc_tamdar_unit)
           open(unit=varbc_tamdar_unit,file="varbc_tamdar_detail.log",status="replace")
       end if
+      if (use_varbc_synop) then
+          call da_get_unit (varbc_synop_unit)
+          open(unit=varbc_synop_unit,file="varbc_synop_detail.log",status="replace")
+      end if
    end if
 
    if (trace_use) call da_trace_exit("da_wrfvar_init2")
