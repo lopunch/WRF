@@ -16,7 +16,7 @@
    character(len=99)               :: fmt_param
    character(len=30)               :: stringn
 
-   real, allocatable               :: sum_tl(:),varbc_param_tl(:)
+   real, allocatable               :: varbc_param_tl(:)
 
 
    if (trace_use) call da_trace_entry("da_varbc_synop_update")
@@ -31,7 +31,6 @@
        stringn = '(2X,A,'//trim(ADJUSTL(stringn))//'f9.3)'
        stringn = trim(adjustl(stringn))
 
-       allocate( sum_tl(npred) )
        allocate( varbc_param_tl(npred) )
 
        write(unit=varbc_synop_unit,fmt='(/10X,A)') &
@@ -42,27 +41,20 @@
        if (iv%varbc_synop%u%nobs_sum >= varbc_synop_nobsmin) then
 
            if (rootproc) then
-!          if (iv%varbc_synop%u%nobs > 0) then
                do ipred = 1, npred
                   varbc_param_tl(ipred) = &
                             SUM( cv(iv%varbc_synop%u%index(1:npred)) * &
                                  iv%varbc_synop%u%vtox(ipred,1:npred) )
                end do
-!          end if
 
-!          do ipred = 1, npred
-!             sum_tl(ipred) = wrf_dm_sum_real( varbc_param_tl(ipred) )
-!             iv%varbc_synop%u%param(ipred) = iv%varbc_synop%u%param(ipred) + sum_tl(ipred)
-!          end do
-           iv%varbc_synop%u%param = iv%varbc_synop%u%param + varbc_param_tl    
+               iv%varbc_synop%u%param(1:npred) = iv%varbc_synop%u%param(1:npred) + varbc_param_tl    
 
-!              write(unit=varbc_synop_unit,fmt=stringn) 'U parameters updated : ',sum_tl(:)
                write(unit=varbc_synop_unit,fmt=stringn) 'U parameters updated : ',varbc_param_tl(:)
            end if
 
        end if
 
-       deallocate(sum_tl, varbc_param_tl)
+       deallocate(varbc_param_tl)
 
        !v wind 
       
@@ -72,7 +64,6 @@
        stringn = '(2X,A,'//trim(ADJUSTL(stringn))//'f9.3)'
        stringn = trim(adjustl(stringn))
 
-       allocate( sum_tl(npred) )
        allocate( varbc_param_tl(npred) )
 
        write(unit=varbc_synop_unit,fmt='(/10X,A)') &
@@ -83,27 +74,20 @@
        if (iv%varbc_synop%v%nobs_sum >= varbc_synop_nobsmin) then
 
            if (rootproc) then
-!          if (iv%varbc_synop%v%nobs > 0) then
                do ipred = 1, npred
                   varbc_param_tl(ipred) = &
                             SUM( cv(iv%varbc_synop%v%index(1:npred)) * &
                                  iv%varbc_synop%v%vtox(ipred,1:npred) )
                end do
-!          end if
 
-!          do ipred = 1, npred
-!             sum_tl(ipred) = wrf_dm_sum_real( varbc_param_tl(ipred) )
-!             iv%varbc_synop%v%param(ipred) = iv%varbc_synop%v%param(ipred) + sum_tl(ipred)
-!          end do
-           iv%varbc_synop%v%param = iv%varbc_synop%v%param + varbc_param_tl
+               iv%varbc_synop%v%param(1:npred) = iv%varbc_synop%v%param(1:npred) + varbc_param_tl    
 
-!              write(unit=varbc_synop_unit,fmt=stringn) 'V parameters updated : ',sum_tl(:)
                write(unit=varbc_synop_unit,fmt=stringn) 'V parameters updated : ',varbc_param_tl(:)
            end if
 
        end if
 
-       deallocate(sum_tl, varbc_param_tl)
+       deallocate(varbc_param_tl)
 
        !temperature
       
@@ -113,7 +97,6 @@
        stringn = '(2X,A,'//trim(ADJUSTL(stringn))//'f9.3)'
        stringn = trim(adjustl(stringn))
 
-       allocate( sum_tl(npred) )
        allocate( varbc_param_tl(npred) )
 
        write(unit=varbc_synop_unit,fmt='(/10X,A)') &
@@ -124,27 +107,20 @@
        if (iv%varbc_synop%t%nobs_sum >= varbc_synop_nobsmin) then
 
            if (rootproc) then
-!          if (iv%varbc_synop%t%nobs > 0) then
                do ipred = 1, npred
                   varbc_param_tl(ipred) = &
                             SUM( cv(iv%varbc_synop%t%index(1:npred)) * &
                                  iv%varbc_synop%t%vtox(ipred,1:npred) )
                end do
-!          end if
 
-!          do ipred = 1, npred
-!             sum_tl(ipred) = wrf_dm_sum_real( varbc_param_tl(ipred) )
-!             iv%varbc_synop%t%param(ipred) = iv%varbc_synop%t%param(ipred) + sum_tl(ipred)
-!          end do
-           iv%varbc_synop%t%param = iv%varbc_synop%t%param + varbc_param_tl
+               iv%varbc_synop%t%param(1:npred) = iv%varbc_synop%t%param(1:npred) + varbc_param_tl    
 
-!              write(unit=varbc_synop_unit,fmt=stringn) 'T parameters updated : ',sum_tl(:)
                write(unit=varbc_synop_unit,fmt=stringn) 'T parameters updated : ',varbc_param_tl(:)
            end if
 
        end if
 
-       deallocate(sum_tl, varbc_param_tl)
+       deallocate(varbc_param_tl)
 
        !qvapor
       
@@ -154,7 +130,6 @@
        stringn = '(2X,A,'//trim(ADJUSTL(stringn))//'f9.3)'
        stringn = trim(adjustl(stringn))
 
-       allocate( sum_tl(npred) )
        allocate( varbc_param_tl(npred) )
 
        write(unit=varbc_synop_unit,fmt='(/10X,A)') &
@@ -165,65 +140,30 @@
        if (iv%varbc_synop%q%nobs_sum >= varbc_synop_nobsmin) then
 
            if (rootproc) then
-!          if (iv%varbc_synop%q%nobs > 0) then
                do ipred = 1, npred
                   varbc_param_tl(ipred) = &
                             SUM( cv(iv%varbc_synop%q%index(1:npred)) * &
                                  iv%varbc_synop%q%vtox(ipred,1:npred) )
                end do
-!          end if
 
-!          do ipred = 1, npred
-!             sum_tl(ipred) = wrf_dm_sum_real( varbc_param_tl(ipred) )
-!             iv%varbc_synop%q%param(ipred) = iv%varbc_synop%q%param(ipred) + sum_tl(ipred)
-!          end do
-           iv%varbc_synop%q%param = iv%varbc_synop%q%param + varbc_param_tl
+               iv%varbc_synop%q%param(1:npred) = iv%varbc_synop%q%param(1:npred) + varbc_param_tl    
 
-!              write(unit=varbc_synop_unit,fmt=stringn) 'Q parameters updated : ',sum_tl(:)
                write(unit=varbc_synop_unit,fmt=stringn) 'Q parameters updated : ',varbc_param_tl(:)
            end if
 
        end if
 
-       deallocate(sum_tl, varbc_param_tl)
+       deallocate(varbc_param_tl)
 
    if (.not. rootproc) then
        if (trace_use) call da_trace_exit("da_varbc_synop_update")
        return
    end if
 
-!  !-----------------------------------!
-!  !  Write VARBC_SYNOP.tbl.out file  !
-!  !-----------------------------------!
-!  
-!  allocate( uparam (iv%varbc_synop%u%nmaxpred) )
-!  allocate( vparam (iv%varbc_synop%v%nmaxpred) )
-!  allocate( tparam (iv%varbc_synop%t%nmaxpred) )
-!  allocate( qparam (iv%varbc_synop%q%nmaxpred) )
-
-!  call da_get_unit(iunit)
-!  open(unit=iunit,file='VARBC_SYNOP.tbl', form='formatted', status='old')
-
-!  do i = 1, 10
-!     read(iunit, *)
-!  end do
-!  
-!  read(iunit, *) !skip variable name
-!  read(iunit, *) uparam(1:iv%varbc_synop%u%nmaxpred)
-
-!  read(iunit, *) !skip variable name
-!  read(iunit, *) vparam(1:iv%varbc_synop%v%nmaxpred)
-
-!  read(iunit, *) !skip variable name
-!  read(iunit, *) tparam(1:iv%varbc_synop%t%nmaxpred)
-
-!  read(iunit, *) !skip variable name
-!  read(iunit, *) qparam(1:iv%varbc_synop%q%nmaxpred)
-
-!  close(iunit)
-!  call da_free_unit(iunit)
-
-
+   !-----------------------------------!
+   !  Write VARBC_SYNOP.tbl.out file  !
+   !-----------------------------------!
+   
  ! write updated parameters
 
    call da_get_unit(iunit)
@@ -266,8 +206,6 @@
    call da_free_unit(iunit)
 
    if (rootproc) write(unit=varbc_synop_unit,fmt='(//5X,A/)') 'VARBC_SYNOP is done'
-
-   stop
 
    if (trace_use) call da_trace_exit("da_varbc_synop_update")
 

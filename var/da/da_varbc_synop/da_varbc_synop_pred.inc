@@ -193,59 +193,6 @@
   
    if(rootproc) be % cv % size_jsp = size_jsp
 
-!  if (rootproc .and. iv%varbc_synop%u%nobs_sum >= varbc_synop_nobsmin) &
-!      write(unit=varbc_synop_unit,fmt='(/10X,A)') " U    Predictors  &  Obs Count"
-
-!  write(stringn,'(I3)') iv%varbc_synop%u%npred
-!  stringn = '(14X,'//trim(ADJUSTL(stringn))//'f8.3,3I5)'
-!  stringn = trim(adjustl(stringn))
-
-!  if (rootproc .and. iv%varbc_synop%u%nobs_sum >= varbc_synop_nobsmin) then
-!      write(unit=varbc_synop_unit,fmt=stringn) &
-!              iv%varbc_synop%u%pred(1:iv%varbc_synop%u%npred), &
-!              iv%varbc_synop%u%nobs_sum
-!  end if
-
-!  if (rootproc .and. iv%varbc_synop%v%nobs_sum >= varbc_synop_nobsmin) &
-!      write(unit=varbc_synop_unit,fmt='(/10X,A)') " V    Predictors  &  Obs Count"
-
-!  write(stringn,'(I3)') iv%varbc_synop%v%npred
-!  stringn = '(14X,'//trim(ADJUSTL(stringn))//'f8.3,3I5)'
-!  stringn = trim(adjustl(stringn))
-
-!  if (rootproc .and. iv%varbc_synop%v%nobs_sum >= varbc_synop_nobsmin) then
-!      write(unit=varbc_synop_unit,fmt=stringn) &
-!              iv%varbc_synop%v%pred(1:iv%varbc_synop%v%npred), &
-!              iv%varbc_synop%v%nobs_sum
-!  end if
-
-!  if (rootproc .and. iv%varbc_synop%t%nobs_sum >= varbc_synop_nobsmin) &
-!      write(unit=varbc_synop_unit,fmt='(/10X,A)') " T    Predictors  &  Obs Count"
-
-!  write(stringn,'(I3)') iv%varbc_synop%t%npred
-!  stringn = '(14X,'//trim(ADJUSTL(stringn))//'f8.3,3I5)'
-!  stringn = trim(adjustl(stringn))
-
-!  if (rootproc .and. iv%varbc_synop%t%nobs_sum >= varbc_synop_nobsmin) then
-!      write(unit=varbc_synop_unit,fmt=stringn) &
-!              iv%varbc_synop%t%pred(1:iv%varbc_synop%t%npred), &
-!              iv%varbc_synop%t%nobs_sum
-!  end if
-
-!  if (rootproc .and. iv%varbc_synop%q%nobs_sum >= varbc_synop_nobsmin) &
-!      write(unit=varbc_synop_unit,fmt='(/10X,A)') " Q    Predictors  &  Obs Count"
-
-!  write(stringn,'(I3)') iv%varbc_synop%q%npred
-!  stringn = '(14X,'//trim(ADJUSTL(stringn))//'f8.3,3I5)'
-!  stringn = trim(adjustl(stringn))
-
-!  if (rootproc .and. iv%varbc_synop%q%nobs_sum >= varbc_synop_nobsmin) then
-!      write(unit=varbc_synop_unit,fmt=stringn) &
-!              iv%varbc_synop%q%pred(1:iv%varbc_synop%q%npred), &
-!              iv%varbc_synop%q%nobs_sum
-!  end if
-
-
    if (trace_use) call da_trace_exit("da_varbc_synop_pred")
 
    end subroutine da_varbc_synop_pred
