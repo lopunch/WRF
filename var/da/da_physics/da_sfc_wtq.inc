@@ -136,12 +136,12 @@ subroutine da_sfc_wtq (psfc, tg, ps, ts, qs, us, vs, &
    ! 2.2 Convert ground virtual temperature assuming it's saturated
 
    call da_tp_to_qs(tg, psfc, eg, qg) !output qg is specific humidity
-   qg = qg*(1.0-qg) !hcl convert to mixing ratio
    if ( present(qsfc_wrf) ) then
       if ( qsfc_wrf > 0.0 ) then
-         qg = qsfc_wrf
+         qg = qsfc_wrf  !qsfc_wrf is specific humidity at lower boundary
       end if
    endif
+   qg = qg/(1.0-qg) !hcl convert to mixing ratio
 
    tvg  = tg * (1.0 + 0.608 * qg)
 
@@ -194,7 +194,9 @@ subroutine da_sfc_wtq (psfc, tg, ps, ts, qs, us, vs, &
       if ( vconv_wrf ) then
          ! following the calculation as in module_sf_sfclay.F
          rhox = psfc/(gas_constant*tvg)
-         fluxc = max(hfx/rhox/cp+0.608*tvg*qfx/rhox, 0.0)
+        !fluxc = max(hfx/rhox/cp+0.608*tvg*qfx/rhox, 0.0)
+         fluxc = max(hfx*(thg-ths)/rhox/cp+ &
+                     0.608*tvg*qfx*(qg-qs)/rhox, 0.0)
          vc = (gravity/tg*pblh*fluxc)**0.33
          vc2 = vc*vc
       end if
@@ -448,14 +450,16 @@ subroutine da_sfc_wtq (psfc, tg, ps, ts, qs, us, vs, &
             q2 = qg
          else
             if ( present(qfx) ) then
-               q2 = qg - qfx/(rho*cqs2)
+              !q2 = qg - qfx/(rho*cqs2)
+               q2 = qg - qfx*(qg-qs)/(rho*cqs2)
             end if
          end if
          if ( chs2 < 1.e-5 ) then
             t2 = tg
          else
             if ( present(hfx) ) then
-               t2 = tg - hfx/(rho*cp*chs2)
+              !t2 = tg - hfx/(rho*cp*chs2)
+               t2 = tg - hfx*(thg-ths)/(rho*cp*chs2)
             end if
          end if
       end if

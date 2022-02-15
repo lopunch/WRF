@@ -34,6 +34,8 @@ subroutine da_transfer_wrftoxb(xbx, grid, config_flags)
 
    logical:: no_ppb
    logical :: has_znt, has_regime
+   logical :: has_flux
+   logical, save :: is_first_time = .true.
 
    real, dimension(ims:ime,kms:kme) :: pf, pp
 
@@ -44,6 +46,7 @@ subroutine da_transfer_wrftoxb(xbx, grid, config_flags)
    real              :: zlclg(ids:ide,jds:jde)
    real              :: zlcl(ims:ime,jms:jme)
 
+   real, allocatable :: ths(:,:), thg(:,:), qmix(:,:)
 
    call sfclayinit !for da_sfc_wtq
 
@@ -652,6 +655,32 @@ subroutine da_transfer_wrftoxb(xbx, grid, config_flags)
 
    has_regime = sum(grid%regime*grid%regime) > 0.0
    has_znt    = sum(grid%znt*grid%znt)       > 0.0
+   has_flux   = sum(grid%qfx*grid%qfx)       > 0.0 .and. &
+                sum(grid%hfx*grid%hfx)       > 0.0
+
+   !Add for sfc_assi_opt = 2. Let the code adjust heat and water vapor
+   !flux (yclo 08/10/2021)
+   if(is_first_time .and. has_flux) then
+      allocate(ths (its:ite,jts:jte), &
+               thg (its:ite,jts:jte), &
+               qmix(its:ite,jts:jte))
+      do j = jts, jte
+      do i = its, ite
+         ths(i,j) = grid%t_2(i,j,kts) + t0
+         thg(i,j) = grid%tsk(i,j) * (base_pres / grid%psfc(i,j)) ** kappa
+         qmix(i,j) = grid%qsfc(i,j) / (1.0-grid%qsfc(i,j)) 
+
+         !assume hfx & qfx is proportional to (thg - ths) & (qsfc-q), 
+         !remove the component of (thg - ths) from original hfx
+         grid%hfx(i,j)  = grid%hfx(i,j) / (thg(i,j) - ths(i,j))
+         grid%qfx(i,j)  = grid%qfx(i,j) / (qmix(i,j) - grid%moist(i,j,kts,p_qv))
+      end do 
+      end do 
+      deallocate(ths, thg, qmix)
+
+      is_first_time = .false.
+   end if
+
    if ( has_regime .neqv. has_znt ) then
       ! make sure they are consistent
       ! either both from model, or both calculated here
@@ -719,7 +748,7 @@ subroutine da_transfer_wrftoxb(xbx, grid, config_flags)
             ! regimes can not be zero for sfc_assi_options=2.
             ! regimes calculated here could be very different from WRF values
             ! due to the lack of some input sfc info
-            call da_sfc_wtq(grid%xb%psfc(i,j), grid%xb%tgrn(i,j), &
+            call da_sfc_wtq(grid%xb%psfc(i,j), grid%xb%tsk(i,j), &
 #ifdef A2C
                grid%xb%p(i,j,kts), grid%xb%t(i,j,kts), grid%xb%q(i,j,kts),uu,vv, &
 #else
