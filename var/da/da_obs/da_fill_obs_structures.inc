@@ -143,7 +143,7 @@ subroutine da_fill_obs_structures(iv, ob, uvq_direct)
         if ( q_error_options == 1 ) then
          ! Calculate q error from rh error:
 
-         if (.not. present(uvq_direct) .or. (present(uvq_direct) .and. (.not. uvq_direct))) then
+         if (.not. present(uvq_direct)) then
          rh_error = iv%synop(n)%q%error ! q error is rh at this stage!
 
          ! if((ob % synop(n) % p > iv%ptop) .AND. &
@@ -160,7 +160,26 @@ subroutine da_fill_obs_structures(iv, ob, uvq_direct)
          if (iv%synop(n)% q % error == missing_r) iv%synop(n)% q % qc = missing_data
 
          ! end if
-         end if
+	 else  !uvq_direct exist
+	    if (.not. uvq_direct) then
+		 rh_error = iv%synop(n)%q%error ! q error is rh at this stage!
+
+		 ! if((ob % synop(n) % p > iv%ptop) .AND. &
+		 !    (ob % synop(n) % t > 100.0) .AND. &
+		 !    (ob % synop(n) % q > 0.0) .AND. &
+		 !    (iv % synop(n) % p % qc >= obs_qc_pointer) .and. &
+		 !    (iv % synop(n) % t % qc >= obs_qc_pointer) .and. &
+		 !    (iv % synop(n) % q % qc >= obs_qc_pointer)) then
+		 call da_get_q_error(ob % synop(n) % p, &
+				      ob % synop(n) % t, &
+				      ob % synop(n) % q, &
+				      iv % synop(n) % t % error, &
+				      rh_error, iv % synop(n) % q % error)
+		 if (iv%synop(n)% q % error == missing_r) iv%synop(n)% q % qc = missing_data
+
+		 ! end if
+	     end if
+	 end if
         end if !q_error_options
       end do      
    end if
