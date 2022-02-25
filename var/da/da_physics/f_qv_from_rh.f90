@@ -78,7 +78,8 @@
 
 !...MIXING RATIO in kg/kg
 
-      QV_KG  = 0.01 * (RH0 * QS + RH * QS0)
+!     QV_KG  = 0.01 * (RH0 * QS + RH * QS0)
+      QV_KG  = HYPOT(0.01 * RH0 * QS, 0.01 * RH * QS0)
       QV_KG0 = 0.01 * RH0 * QS0
 
 !...Mixing ratio must be positive
