@@ -14,7 +14,7 @@
 
    type (iv_type), intent (inout) :: iv
 
-   integer                        :: i,j,iobs,isn,ipred,npred
+   integer                        :: i,j,iobs,ipred,npred
    real                           :: lhessian,lbgerr,predi,predj,verr
 
    real, allocatable 		  :: hessian(:,:)
@@ -42,11 +42,12 @@
 
        lbgerr = 0.0
        if (iv%varbc_synop%u%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%u%nobs
-              isn  = iv%varbc_synop%u%obs_sn(iobs)
-              verr = iv%synop(isn)%u%error
-              lbgerr = lbgerr + verr * verr / varbc_synop_nbgerr
-           end do
+           do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+              if (iv%synop(iobs)%u%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                  verr = iv%synop(iobs)%u%error
+                  lbgerr = lbgerr + verr * verr / varbc_synop_nbgerr
+	      end if
+	   end do
        end if
        lbgerr = wrf_dm_sum_real(lbgerr)
 
@@ -55,14 +56,15 @@
              lhessian = 0.0	
    
              if (iv%varbc_synop%u%nobs > 0) then
-                 do iobs = 1, iv%varbc_synop%u%nobs
-                    predi = iv%varbc_synop%u%pred(i,iobs)
-                    predj = iv%varbc_synop%u%pred(j,iobs)
+                 do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+                    if (iv%synop(iobs)%u%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                       predi = iv%varbc_synop%u%pred(i,iobs)
+                       predj = iv%varbc_synop%u%pred(j,iobs)
 
-                    isn   = iv%varbc_synop%u%obs_sn(iobs)
-                    verr  = iv%synop(isn)%u%error
+                       verr  = iv%synop(iobs)%u%error
 
-                    lhessian = lhessian + predi*predj/(verr*verr)
+                       lhessian = lhessian + predi*predj/(verr*verr)
+		    end if
                  end do
              end if
 
@@ -117,11 +119,12 @@
 
        lbgerr = 0.0
        if (iv%varbc_synop%v%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%v%nobs
-              isn  = iv%varbc_synop%v%obs_sn(iobs)
-              verr = iv%synop(isn)%v%error
-              lbgerr = lbgerr + verr * verr / varbc_synop_nbgerr
-           end do
+           do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+              if (iv%synop(iobs)%v%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                  verr = iv%synop(iobs)%v%error
+                  lbgerr = lbgerr + verr * verr / varbc_synop_nbgerr
+	      end if
+	   end do
        end if
        lbgerr = wrf_dm_sum_real(lbgerr)
 
@@ -130,16 +133,18 @@
              lhessian = 0.0	
    
              if (iv%varbc_synop%v%nobs > 0) then
-                 do iobs = 1, iv%varbc_synop%v%nobs
-                    predi = iv%varbc_synop%v%pred(i,iobs)
-                    predj = iv%varbc_synop%v%pred(j,iobs)
+                 do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+                    if (iv%synop(iobs)%v%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                       predi = iv%varbc_synop%v%pred(i,iobs)
+                       predj = iv%varbc_synop%v%pred(j,iobs)
 
-                    isn   = iv%varbc_synop%v%obs_sn(iobs)
-                    verr  = iv%synop(isn)%v%error
+                       verr  = iv%synop(iobs)%v%error
 
-                    lhessian = lhessian + predi*predj/(verr*verr)
+                       lhessian = lhessian + predi*predj/(verr*verr)
+		    end if
                  end do
              end if
+
              hessian(i,j) = wrf_dm_sum_real(lhessian)
              hessian(j,i) = hessian(i,j)  	       
           end do
@@ -175,6 +180,7 @@
 
    deallocate(hessian, eignvec, eignval)   
 
+
    !temperature
 
    npred = iv%varbc_synop%t%npred
@@ -191,11 +197,12 @@
 
        lbgerr = 0.0
        if (iv%varbc_synop%t%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%t%nobs
-              isn  = iv%varbc_synop%t%obs_sn(iobs)
-              verr = iv%synop(isn)%t%error
-              lbgerr = lbgerr + verr * verr / varbc_synop_nbgerr
-           end do
+           do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+              if (iv%synop(iobs)%t%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                  verr = iv%synop(iobs)%t%error
+                  lbgerr = lbgerr + verr * verr / varbc_synop_nbgerr
+	      end if
+	   end do
        end if
        lbgerr = wrf_dm_sum_real(lbgerr)
 
@@ -204,16 +211,18 @@
              lhessian = 0.0	
    
              if (iv%varbc_synop%t%nobs > 0) then
-                 do iobs = 1, iv%varbc_synop%t%nobs
-                    predi = iv%varbc_synop%t%pred(i,iobs)
-                    predj = iv%varbc_synop%t%pred(j,iobs)
+                 do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+                    if (iv%synop(iobs)%t%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                       predi = iv%varbc_synop%t%pred(i,iobs)
+                       predj = iv%varbc_synop%t%pred(j,iobs)
 
-                    isn   = iv%varbc_synop%t%obs_sn(iobs)
-                    verr  = iv%synop(isn)%t%error
+                       verr  = iv%synop(iobs)%t%error
 
-                    lhessian = lhessian + predi*predj/(verr*verr)
+                       lhessian = lhessian + predi*predj/(verr*verr)
+		    end if
                  end do
              end if
+
              hessian(i,j) = wrf_dm_sum_real(lhessian)
              hessian(j,i) = hessian(i,j)  	       
           end do
@@ -249,6 +258,7 @@
 
    deallocate(hessian, eignvec, eignval)   
 
+
    !qvapor
 
    npred = iv%varbc_synop%q%npred
@@ -265,11 +275,12 @@
 
        lbgerr = 0.0
        if (iv%varbc_synop%q%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%q%nobs
-              isn  = iv%varbc_synop%q%obs_sn(iobs)
-              verr = iv%synop(isn)%q%error
-              lbgerr = lbgerr + verr * verr / varbc_synop_nbgerr
-           end do
+           do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+              if (iv%synop(iobs)%q%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                  verr = iv%synop(iobs)%q%error
+                  lbgerr = lbgerr + verr * verr / varbc_synop_nbgerr
+	      end if
+	   end do
        end if
        lbgerr = wrf_dm_sum_real(lbgerr)
 
@@ -278,16 +289,18 @@
              lhessian = 0.0	
    
              if (iv%varbc_synop%q%nobs > 0) then
-                 do iobs = 1, iv%varbc_synop%q%nobs
-                    predi = iv%varbc_synop%q%pred(i,iobs)
-                    predj = iv%varbc_synop%q%pred(j,iobs)
+                 do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+                    if (iv%synop(iobs)%q%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                       predi = iv%varbc_synop%q%pred(i,iobs)
+                       predj = iv%varbc_synop%q%pred(j,iobs)
 
-                    isn   = iv%varbc_synop%q%obs_sn(iobs)
-                    verr  = iv%synop(isn)%q%error
+                       verr  = iv%synop(iobs)%q%error
 
-                    lhessian = lhessian + predi*predj/(verr*verr)
+                       lhessian = lhessian + predi*predj/(verr*verr)
+		    end if
                  end do
              end if
+
              hessian(i,j) = wrf_dm_sum_real(lhessian)
              hessian(j,i) = hessian(i,j)  	       
           end do
@@ -322,6 +335,7 @@
    end if
 
    deallocate(hessian, eignvec, eignval)   
+
 
 
    if (rootproc) &

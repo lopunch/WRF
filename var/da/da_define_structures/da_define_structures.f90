@@ -468,7 +468,6 @@ module da_define_structures
       integer                         :: nobs       ! Obs No. in proc
       integer                         :: nobs_sum   ! Total Obs No.
       integer               , pointer :: index (:)  ! Index in CV
-      integer               , pointer :: obs_sn(:)  ! Serial No. of Obs in proc
       real                  , pointer :: pred  (:,:)! Predictors( [ npred, nobs ] )
       real                  , pointer :: param (:)  ! Parameters( [ npred ] )
       real                  , pointer :: bgerr (:)  ! Bkg err in Hessian

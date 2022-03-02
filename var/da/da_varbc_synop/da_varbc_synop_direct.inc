@@ -1,7 +1,7 @@
    subroutine da_varbc_synop_direct (iv,ob)
 
    !-----------------------------------------------!
-   !  Apply bias correction to TAMDAR innovations  !
+   !  Apply bias correction to SYNOP innovations  !
    !-----------------------------------------------!
 
    implicit none
@@ -11,7 +11,7 @@
 
    real                            :: bc,bias
    real                            :: contri(5)
-   integer                         :: i,iobs,ipred,isn,npred
+   integer                         :: i,iobs,ipred,npred
    character(len=30)               :: stringn
 
 
@@ -25,96 +25,95 @@
        bias  = 0.
        npred = iv%varbc_synop%u%npred
 
-       if (iv%varbc_synop%u%nobs > 0) then 
-           do iobs = 1, iv%varbc_synop%u%nobs
-              bc = dot_product( iv%varbc_synop%u%param(1:npred),  &
-                                iv%varbc_synop%u%pred (1:npred,iobs) )
-              isn  = iv%varbc_synop%u%obs_sn(iobs)
-              bias = bias + iv%synop(isn)%u%inv
+       do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+          if (abs(iv%synop(iobs)%u%inv-missing_r) > 1.0) then
+             bc = dot_product( iv%varbc_synop%u%param(1:npred),  &
+                               iv%varbc_synop%u%pred (1:npred,iobs) )
+             if(iv%info(synop)%proc_domain(1,iobs)) bias = bias + iv%synop(iobs)%u%inv
 
-              iv%synop(isn)%u%inv = iv%synop(isn)%u%inv - bc
-           end do
-       end if
+             iv%synop(iobs)%u%inv = iv%synop(iobs)%u%inv - bc
+	  end if
+       end do
 
        if (iv%varbc_synop%u%nobs_sum > 0) &
            bias = wrf_dm_sum_real(bias)/iv%varbc_synop%u%nobs_sum
 
        if (rootproc) then
-           write(unit=varbc_synop_unit,fmt='(10X,A,2F10.4)') &
+           write(unit=varbc_synop_unit,fmt='(10X,A,2ES15.7)') &
                 'bias corrected for synop u: (BC,OMB)', bc, bias
        end if
 
        ! v wind
 
-       bias = 0.
+       bias  = 0.
        npred = iv%varbc_synop%v%npred
 
-       if (iv%varbc_synop%v%nobs > 0) then 
-           do iobs = 1, iv%varbc_synop%v%nobs
-              bc = dot_product( iv%varbc_synop%v%param(1:npred),  &
-                                iv%varbc_synop%v%pred (1:npred,iobs) )
-              isn  = iv%varbc_synop%v%obs_sn(iobs)
-              bias = bias + iv%synop(isn)%v%inv
+       do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+          if (abs(iv%synop(iobs)%v%inv-missing_r) > 1.0) then
+             bc = dot_product( iv%varbc_synop%v%param(1:npred),  &
+                               iv%varbc_synop%v%pred (1:npred,iobs) )
+             if(iv%info(synop)%proc_domain(1,iobs)) bias = bias + iv%synop(iobs)%v%inv
 
-              iv%synop(isn)%v%inv = iv%synop(isn)%v%inv - bc
-           end do
-       end if
+             iv%synop(iobs)%v%inv = iv%synop(iobs)%v%inv - bc
+	  end if
+       end do
 
        if (iv%varbc_synop%v%nobs_sum > 0) &
            bias = wrf_dm_sum_real(bias)/iv%varbc_synop%v%nobs_sum
 
        if (rootproc) then
-           write(unit=varbc_synop_unit,fmt='(10X,A,2F10.4)') &
+           write(unit=varbc_synop_unit,fmt='(10X,A,2ES15.7)') &
                 'bias corrected for synop v: (BC,OMB)', bc, bias
        end if
 
+
        ! temperature
 
-       bias = 0.
+       bias  = 0.
        npred = iv%varbc_synop%t%npred
 
-       if (iv%varbc_synop%t%nobs > 0) then 
-           do iobs = 1, iv%varbc_synop%t%nobs
-              bc = dot_product( iv%varbc_synop%t%param(1:npred),  &
-                                iv%varbc_synop%t%pred (1:npred,iobs) )
-              isn  = iv%varbc_synop%t%obs_sn(iobs)
-              bias = bias + iv%synop(isn)%t%inv
+       do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+          if (abs(iv%synop(iobs)%t%inv-missing_r) > 1.0) then
+             bc = dot_product( iv%varbc_synop%t%param(1:npred),  &
+                               iv%varbc_synop%t%pred (1:npred,iobs) )
+             if(iv%info(synop)%proc_domain(1,iobs)) bias = bias + iv%synop(iobs)%t%inv
 
-              iv%synop(isn)%t%inv = iv%synop(isn)%t%inv - bc
-           end do
-       end if
+             iv%synop(iobs)%t%inv = iv%synop(iobs)%t%inv - bc
+	  end if
+       end do
 
        if (iv%varbc_synop%t%nobs_sum > 0) &
            bias = wrf_dm_sum_real(bias)/iv%varbc_synop%t%nobs_sum
 
        if (rootproc) then
-           write(unit=varbc_synop_unit,fmt='(10X,A,2F10.4)') &
+           write(unit=varbc_synop_unit,fmt='(10X,A,2ES15.7)') &
                 'bias corrected for synop t: (BC,OMB)', bc, bias
        end if
 
+
        ! qvapor
 
-       bias = 0.
-       npred = iv%varbc_synop%t%npred
+       bias  = 0.
+       npred = iv%varbc_synop%q%npred
 
-       if (iv%varbc_synop%q%nobs > 0) then 
-           do iobs = 1, iv%varbc_synop%q%nobs
-              bc = dot_product( iv%varbc_synop%q%param(1:npred),  &
-                                iv%varbc_synop%q%pred (1:npred,iobs) )
-              isn  = iv%varbc_synop%q%obs_sn(iobs)
-              bias = bias + iv%synop(isn)%q%inv
+       do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+          if (abs(iv%synop(iobs)%q%inv-missing_r) > 1.0) then
+             bc = dot_product( iv%varbc_synop%q%param(1:npred),  &
+                            iv%varbc_synop%q%pred (1:npred,iobs) )
+             if(iv%info(synop)%proc_domain(1,iobs)) bias = bias + iv%synop(iobs)%q%inv
 
-              iv%synop(isn)%q%inv = iv%synop(isn)%q%inv - bc
-           end do
-       end if
+             iv%synop(iobs)%q%inv = iv%synop(iobs)%q%inv - bc
+	  end if
+       end do
 
        if (iv%varbc_synop%q%nobs_sum > 0) &
            bias = wrf_dm_sum_real(bias)/iv%varbc_synop%q%nobs_sum
 
        if (rootproc) then
-           write(unit=varbc_synop_unit,fmt='(10X,A,2F10.4)') &
+           write(unit=varbc_synop_unit,fmt='(10X,A,2ES15.7)') &
                 'bias corrected for synop q: (BC,OMB)', bc, bias
        end if
+
 
        if (rootproc) write(unit=varbc_synop_unit,fmt='(/10X,A)') &
                    "Variable Predictor/Parameter/Bias model (npred)  &  BC"

@@ -1093,7 +1093,7 @@
       if (use_varbc_tamdar) &
          call da_varbc_tamdar_update(cv_size, xhat, iv)
       if (use_varbc_synop) &
-         call da_varbc_synop_update(cv_size, xhat, iv)
+         call da_varbc_synop_update(it, cv_size, xhat, iv)
 
       !------------------------------------------------------------------------
       ! [8.10] Output WRFVAR analysis and analysis increments:
@@ -1227,28 +1227,24 @@
 
    if (use_varbc_synop) then
       deallocate (iv%varbc_synop%u%index)
-      deallocate (iv%varbc_synop%u%obs_sn)
       deallocate (iv%varbc_synop%u%pred)
       deallocate (iv%varbc_synop%u%param)
       deallocate (iv%varbc_synop%u%bgerr)
       deallocate (iv%varbc_synop%u%vtox)
 
       deallocate (iv%varbc_synop%v%index)
-      deallocate (iv%varbc_synop%v%obs_sn)
       deallocate (iv%varbc_synop%v%pred)
       deallocate (iv%varbc_synop%v%param)
       deallocate (iv%varbc_synop%v%bgerr)
       deallocate (iv%varbc_synop%v%vtox)
 
       deallocate (iv%varbc_synop%t%index)
-      deallocate (iv%varbc_synop%t%obs_sn)
       deallocate (iv%varbc_synop%t%pred)
       deallocate (iv%varbc_synop%t%param)
       deallocate (iv%varbc_synop%t%bgerr)
       deallocate (iv%varbc_synop%t%vtox)
 
       deallocate (iv%varbc_synop%q%index)
-      deallocate (iv%varbc_synop%q%obs_sn)
       deallocate (iv%varbc_synop%q%pred)
       deallocate (iv%varbc_synop%q%param)
       deallocate (iv%varbc_synop%q%bgerr)

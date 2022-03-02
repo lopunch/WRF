@@ -55,7 +55,6 @@
        npred = iv%varbc_synop%u%npred
        allocate ( iv%varbc_synop%u%param    (nmaxpred) )
        allocate ( iv%varbc_synop%u%pred     (nmaxpred,num_stn) )
-       allocate ( iv%varbc_synop%u%obs_sn   (num_stn) )
        allocate ( iv%varbc_synop%u%bgerr    (npred) )
        allocate ( iv%varbc_synop%u%index    (npred) )
        allocate ( iv%varbc_synop%u%vtox     (npred,npred) )
@@ -63,7 +62,6 @@
        npred = iv%varbc_synop%v%npred
        allocate ( iv%varbc_synop%v%param    (nmaxpred) )
        allocate ( iv%varbc_synop%v%pred     (nmaxpred,num_stn) )
-       allocate ( iv%varbc_synop%v%obs_sn   (num_stn) )
        allocate ( iv%varbc_synop%v%bgerr    (npred) )
        allocate ( iv%varbc_synop%v%index    (npred) )
        allocate ( iv%varbc_synop%v%vtox     (npred,npred) )
@@ -71,7 +69,6 @@
        npred = iv%varbc_synop%t%npred
        allocate ( iv%varbc_synop%t%param    (nmaxpred) )
        allocate ( iv%varbc_synop%t%pred     (nmaxpred,num_stn) )
-       allocate ( iv%varbc_synop%t%obs_sn   (num_stn) )
        allocate ( iv%varbc_synop%t%bgerr    (npred) )
        allocate ( iv%varbc_synop%t%index    (npred) )
        allocate ( iv%varbc_synop%t%vtox     (npred,npred) )
@@ -79,7 +76,6 @@
        npred = iv%varbc_synop%q%npred
        allocate ( iv%varbc_synop%q%param    (nmaxpred) )
        allocate ( iv%varbc_synop%q%pred     (nmaxpred,num_stn) )
-       allocate ( iv%varbc_synop%q%obs_sn   (num_stn) )
        allocate ( iv%varbc_synop%q%bgerr    (npred) )
        allocate ( iv%varbc_synop%q%index    (npred) )
        allocate ( iv%varbc_synop%q%vtox     (npred,npred) )
@@ -91,7 +87,6 @@
        iv%varbc_synop%u%pred(1,:) = varbc_synop_pred0
        iv%varbc_synop%u%bgerr(:)  = 0.
        iv%varbc_synop%u%index(:)  = 0
-       iv%varbc_synop%u%obs_sn(:) = 0
        iv%varbc_synop%u%vtox(:,:) = 0.
 
        iv%varbc_synop%v%nobs      = 0
@@ -101,7 +96,6 @@
        iv%varbc_synop%v%pred(1,:) = varbc_synop_pred0
        iv%varbc_synop%v%bgerr(:)  = 0.
        iv%varbc_synop%v%index(:)  = 0
-       iv%varbc_synop%v%obs_sn(:) = 0
        iv%varbc_synop%v%vtox(:,:) = 0.
 
        iv%varbc_synop%t%nobs      = 0
@@ -111,7 +105,6 @@
        iv%varbc_synop%t%pred(1,:) = varbc_synop_pred0
        iv%varbc_synop%t%bgerr(:)  = 0.
        iv%varbc_synop%t%index(:)  = 0
-       iv%varbc_synop%t%obs_sn(:) = 0
        iv%varbc_synop%t%vtox(:,:) = 0.
 
        iv%varbc_synop%q%nobs      = 0
@@ -121,7 +114,6 @@
        iv%varbc_synop%q%pred(1,:) = varbc_synop_pred0
        iv%varbc_synop%q%bgerr(:)  = 0.
        iv%varbc_synop%q%index(:)  = 0
-       iv%varbc_synop%q%obs_sn(:) = 0
        iv%varbc_synop%q%vtox(:,:) = 0.
 
        write(iv%varbc_synop%fmt_param,*) '(3(2X,E15.7))'

@@ -7,7 +7,7 @@
    type (iv_type), intent(inout) :: iv        
    type (y_type), intent(in)     :: y             ! y = h (xa)
 
-   integer                       :: iobs,ipred,isn,npred
+   integer                       :: iobs,ipred,npred
    real, allocatable             :: varbc_param_adj(:)
    real                          :: yh, cv_local
 
@@ -25,10 +25,11 @@
        varbc_param_adj(:) = 0.0
 
        if (iv%varbc_synop%q%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%q%nobs
-              isn = iv%varbc_synop%q%obs_sn(iobs)
-              varbc_param_adj(1:npred) = varbc_param_adj(1:npred) + &
-                  y%synop(isn)%q * iv%varbc_synop%q%pred(1:npred,iobs)
+           do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+              if (iv%synop(iobs)%q%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                 varbc_param_adj(1:npred) = varbc_param_adj(1:npred) + &
+                     y%synop(iobs)%q * iv%varbc_synop%q%pred(1:npred,iobs)
+	      end if
            end do
        end if
 
@@ -58,10 +59,11 @@
        varbc_param_adj(:) = 0.0
 
        if (iv%varbc_synop%t%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%t%nobs
-              isn = iv%varbc_synop%t%obs_sn(iobs)
-              varbc_param_adj(1:npred) = varbc_param_adj(1:npred) + &
-                  y%synop(isn)%t * iv%varbc_synop%t%pred(1:npred,iobs)
+           do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+              if (iv%synop(iobs)%t%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                 varbc_param_adj(1:npred) = varbc_param_adj(1:npred) + &
+                     y%synop(iobs)%t * iv%varbc_synop%t%pred(1:npred,iobs)
+	      end if 
            end do
        end if
 
@@ -92,10 +94,11 @@
        varbc_param_adj(:) = 0.0
 
        if (iv%varbc_synop%v%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%v%nobs
-              isn = iv%varbc_synop%v%obs_sn(iobs)
-              varbc_param_adj(1:npred) = varbc_param_adj(1:npred) + &
-                  y%synop(isn)%v * iv%varbc_synop%v%pred(1:npred,iobs)
+           do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+              if (iv%synop(iobs)%v%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                 varbc_param_adj(1:npred) = varbc_param_adj(1:npred) + &
+                     y%synop(iobs)%v * iv%varbc_synop%v%pred(1:npred,iobs)
+	      end if 
            end do
        end if
 
@@ -126,10 +129,11 @@
        varbc_param_adj(:) = 0.0
 
        if (iv%varbc_synop%u%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%u%nobs
-              isn = iv%varbc_synop%u%obs_sn(iobs)
-              varbc_param_adj(1:npred) = varbc_param_adj(1:npred) + &
-                  y%synop(isn)%u * iv%varbc_synop%u%pred(1:npred,iobs)
+           do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+              if (iv%synop(iobs)%u%qc >= 0 .and. iv%info(synop)%proc_domain(1,iobs)) then
+                 varbc_param_adj(1:npred) = varbc_param_adj(1:npred) + &
+                     y%synop(iobs)%u * iv%varbc_synop%u%pred(1:npred,iobs)
+	      end if 
            end do
        end if
 
@@ -146,7 +150,8 @@
 
    end if
 
-   deallocate(varbc_param_adj)
+   deallocate(varbc_param_adj)	     
+
 
    if (trace_use) call da_trace_exit("da_varbc_synop_adj")
 

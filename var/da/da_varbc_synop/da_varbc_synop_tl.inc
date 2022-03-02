@@ -13,7 +13,7 @@
    type (iv_type), intent(in)    :: iv   
    type (y_type), intent(inout)  :: y               ! y = h (xa)
 
-   integer                       :: ipred,iobs,isn
+   integer                       :: ipred,iobs
    integer                       :: npred
    real                          :: delta_bc
 
@@ -41,15 +41,13 @@
 
        call wrf_dm_bcast_real( varbc_param_tl, npred )
 
-       if (iv%varbc_synop%u%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%u%nobs
+       do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+           if (iv%synop(iobs)%u%qc >= 0) then
               delta_bc = dot_product( varbc_param_tl(1:npred), &
                                iv%varbc_synop%u%pred(1:npred,iobs) )
-
-              isn = iv%varbc_synop%u%obs_sn(iobs)
-              y%synop(isn)%u = y%synop(isn)%u + delta_bc
-           end do
-       end if
+              y%synop(iobs)%u = y%synop(iobs)%u + delta_bc
+	   end if
+       end do
 
    end if
 
@@ -74,19 +72,18 @@
 
        call wrf_dm_bcast_real( varbc_param_tl, npred )
 
-       if (iv%varbc_synop%v%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%v%nobs
+       do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+           if (iv%synop(iobs)%v%qc >= 0) then
               delta_bc = dot_product( varbc_param_tl(1:npred), &
                                iv%varbc_synop%v%pred(1:npred,iobs) )
-
-              isn = iv%varbc_synop%v%obs_sn(iobs)
-              y%synop(isn)%v = y%synop(isn)%v + delta_bc
-           end do
-       end if
+              y%synop(iobs)%v = y%synop(iobs)%v + delta_bc
+	   end if
+       end do
 
    end if
 
    deallocate(varbc_param_tl)
+
 
    !temperature
 
@@ -107,20 +104,19 @@
 
        call wrf_dm_bcast_real( varbc_param_tl, npred )
 
-       if (iv%varbc_synop%t%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%t%nobs
+       do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+           if (iv%synop(iobs)%t%qc >= 0) then
               delta_bc = dot_product( varbc_param_tl(1:npred), &
                                iv%varbc_synop%t%pred(1:npred,iobs) )
-
-              isn = iv%varbc_synop%t%obs_sn(iobs)
-              y%synop(isn)%t = y%synop(isn)%t + delta_bc
-           end do
-       end if
+              y%synop(iobs)%t = y%synop(iobs)%t + delta_bc
+	   end if
+       end do
 
    end if
 
    deallocate(varbc_param_tl)
-  
+
+ 
    !qvapor
 
    npred = iv%varbc_synop%q%npred
@@ -140,19 +136,18 @@
 
        call wrf_dm_bcast_real( varbc_param_tl, npred )
 
-       if (iv%varbc_synop%q%nobs > 0) then
-           do iobs = 1, iv%varbc_synop%q%nobs
+       do iobs = iv%info(synop)%n1, iv%info(synop)%n2
+           if (iv%synop(iobs)%q%qc >= 0) then
               delta_bc = dot_product( varbc_param_tl(1:npred), &
                                iv%varbc_synop%q%pred(1:npred,iobs) )
-
-              isn = iv%varbc_synop%q%obs_sn(iobs)
-              y%synop(isn)%q = y%synop(isn)%q + delta_bc
-           end do
-       end if
+              y%synop(iobs)%q = y%synop(iobs)%q + delta_bc
+	   end if
+       end do
 
    end if
 
    deallocate(varbc_param_tl)
+
 
 
    if (trace_use) call da_trace_exit("da_varbc_synop_tl")

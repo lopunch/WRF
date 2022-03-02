@@ -37,60 +37,50 @@
    call da_interp_lin_2d (grid%xb%terr, iv%info(synop), 1, model_hsm(:))
 
    do iobs = iv%info(synop)%n1, iv%info(synop)%n2
-      if( iv%info(synop)%proc_domain(1,iobs) ) then !Don't count HALO data
-         !predictors for u,v wind
+       !predictors for u,v wind
 
-         p1 =  hypot(model_u(iobs), model_v(iobs))
-         p2 =  log(model_znt(iobs))
+       p1 =  hypot(model_u(iobs), model_v(iobs))
+       p2 =  log(model_znt(iobs))
 
-!        if (ob%synop(iobs)%u > missing_r .and. iv%synop(iobs)%u%qc >= 0) then
-         if (iv%synop(iobs)%u%qc >= 0) then
+       if (iv%synop(iobs)%u%qc >= 0) then
 
-            iv%varbc_synop%u%nobs = iv%varbc_synop%u%nobs + 1
-            iv%varbc_synop%u%obs_sn(iv%varbc_synop%u%nobs) = iobs
-            iv%varbc_synop%u%pred(2,iv%varbc_synop%u%nobs) = p1
-            iv%varbc_synop%u%pred(3,iv%varbc_synop%u%nobs) = p2
+          iv%varbc_synop%u%pred(2,iobs) = p1
+          iv%varbc_synop%u%pred(3,iobs) = p2
+          if(iv%info(synop)%proc_domain(1,iobs)) iv%varbc_synop%u%nobs = iv%varbc_synop%u%nobs + 1
 
-         end if
+       end if
 
-!        if (ob%synop(iobs)%v > missing_r .and. iv%synop(iobs)%v%qc >= 0) then
-         if (iv%synop(iobs)%v%qc >= 0) then
+       if (iv%synop(iobs)%v%qc >= 0) then
 
-            iv%varbc_synop%v%nobs = iv%varbc_synop%v%nobs + 1
-            iv%varbc_synop%v%obs_sn(iv%varbc_synop%v%nobs) = iobs
-            iv%varbc_synop%v%pred(2,iv%varbc_synop%v%nobs) = p1
-            iv%varbc_synop%v%pred(3,iv%varbc_synop%v%nobs) = p2
+          iv%varbc_synop%v%pred(2,iobs) = p1
+          iv%varbc_synop%v%pred(3,iobs) = p2
+          if(iv%info(synop)%proc_domain(1,iobs)) iv%varbc_synop%v%nobs = iv%varbc_synop%v%nobs + 1
 
-         end if
+       end if
 
-         !predictors for temperature
+       !predictors for temperature
 
-         p1 = model_tsk(iobs) - model_t(iobs)
-         p2 = iv%synop(iobs)%h  - model_hsm(iobs)
+       p1 = model_tsk(iobs) - model_t(iobs)
+       p2 = iv%synop(iobs)%h  - model_hsm(iobs)
 
-!        if (ob%synop(iobs)%t > 0.0 .and. iv%synop(iobs)%t%qc >= 0) then
-         if (iv%synop(iobs)%t%qc >= 0) then
+       if (iv%synop(iobs)%t%qc >= 0) then
 
-            iv%varbc_synop%t%nobs = iv%varbc_synop%t%nobs + 1
-            iv%varbc_synop%t%obs_sn(iv%varbc_synop%t%nobs) = iobs
-            iv%varbc_synop%t%pred(2,iv%varbc_synop%t%nobs) = p1
-            iv%varbc_synop%t%pred(3,iv%varbc_synop%t%nobs) = p2
+          iv%varbc_synop%t%pred(2,iobs) = p1
+          iv%varbc_synop%t%pred(3,iobs) = p2
+          if(iv%info(synop)%proc_domain(1,iobs)) iv%varbc_synop%t%nobs = iv%varbc_synop%t%nobs + 1
 
-         end if
+       end if
 
-         !predictors for qvapor
+       !predictors for qvapor
 
-         p1 = iv%synop(iobs)%h  - model_hsm(iobs)
+       p1 = iv%synop(iobs)%h  - model_hsm(iobs)
 
-!        if (ob%synop(iobs)%q > 0.0 .and. iv%synop(iobs)%q%qc >= 0) then
-         if (iv%synop(iobs)%q%qc >= 0) then
+       if (iv%synop(iobs)%q%qc >= 0) then
 
-            iv%varbc_synop%q%nobs = iv%varbc_synop%q%nobs + 1
-            iv%varbc_synop%q%obs_sn(iv%varbc_synop%q%nobs) = iobs
-            iv%varbc_synop%q%pred(2,iv%varbc_synop%q%nobs) = p1
+          iv%varbc_synop%q%pred(2,iobs) = p1
+          if(iv%info(synop)%proc_domain(1,iobs)) iv%varbc_synop%q%nobs = iv%varbc_synop%q%nobs + 1
 
-         end if
-      end if  !end proc_domain
+       end if
    end do
 
    !====================================================================

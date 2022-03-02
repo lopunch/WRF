@@ -1,4 +1,4 @@
-   subroutine da_varbc_synop_update (cv_size, cv, iv)
+   subroutine da_varbc_synop_update (it, cv_size, cv, iv)
 
    !-----------------------------------!
    !  Update and write out parameters  !
@@ -6,6 +6,7 @@
 
    implicit none
 
+   integer,        intent(in)      :: it        !outer loop counting
    integer,        intent(in)      :: cv_size
    real,           intent(in)      :: cv(1:cv_size)
    type (iv_type), intent(inout)   :: iv   
@@ -167,7 +168,12 @@
  ! write updated parameters
 
    call da_get_unit(iunit)
-   filename = 'VARBC_SYNOP.tbl.out'
+
+   if( it == max_ext_its ) then
+      filename = 'VARBC_SYNOP.tbl.out'
+   else
+      write(unit=filename, fmt='(a,i2.2)') 'VARBC_SYNOP.tbl.out_',it
+   end if
 
    open(unit=iunit,file=trim(adjustl(filename)),iostat=iost,status='replace')
    if (iost /= 0) then
