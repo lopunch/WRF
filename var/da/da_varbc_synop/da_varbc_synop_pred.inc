@@ -12,6 +12,7 @@
 
    integer                       :: iobs,ipred
    real                          :: p1,p2
+   real                          :: u_component, v_component, obs_spd
 
    real, dimension(iv%info(synop)%n1:iv%info(synop)%n2) :: &
         model_u, model_v, model_znt, model_tsk, model_t, model_hsm
@@ -43,19 +44,29 @@
        p1 =  hypot(model_u(iobs), model_v(iobs))
        p2 =  log(model_znt(iobs))
 
-       if (iv%synop(iobs)%u%qc >= 0) then
+       if (iv%synop(iobs)%u%qc >= 0 .and. iv%synop(iobs)%v%qc >= 0) then
 
           iv%varbc_synop%u%pred(2,iobs) = p1
           iv%varbc_synop%u%pred(3,iobs) = p2
           if(iv%info(synop)%proc_domain(1,iobs)) iv%varbc_synop%u%nobs = iv%varbc_synop%u%nobs + 1
 
-       end if
-
-       if (iv%synop(iobs)%v%qc >= 0) then
 
           iv%varbc_synop%v%pred(2,iobs) = p1
           iv%varbc_synop%v%pred(3,iobs) = p2
           if(iv%info(synop)%proc_domain(1,iobs)) iv%varbc_synop%v%nobs = iv%varbc_synop%v%nobs + 1
+
+          obs_spd = hypot(ob % synop(iobs) % u, &
+		          ob % synop(iobs) % v)
+	  if(obs_spd > 0.) then
+	      u_component = ob % synop(iobs) % u / obs_spd
+	      v_component = ob % synop(iobs) % v / obs_spd
+	  else
+	      u_component = 1.
+	      v_component = 1.
+	  end if
+
+	  iv%varbc_synop%u%pred(:,iobs) = u_component * iv%varbc_synop%u%pred(:,iobs)
+	  iv%varbc_synop%v%pred(:,iobs) = v_component * iv%varbc_synop%v%pred(:,iobs)
 
        end if
 
