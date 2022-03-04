@@ -53,6 +53,8 @@
                write(unit=varbc_synop_unit,fmt=stringn) 'U parameters updated : ',varbc_param_tl(:)
            end if
 
+           call wrf_dm_bcast_real( iv%varbc_synop%u%param(1:npred), npred )
+
        end if
 
        deallocate(varbc_param_tl)
@@ -85,6 +87,8 @@
 
                write(unit=varbc_synop_unit,fmt=stringn) 'V parameters updated : ',varbc_param_tl(:)
            end if
+
+           call wrf_dm_bcast_real( iv%varbc_synop%v%param(1:npred), npred )
 
        end if
 
@@ -119,6 +123,8 @@
                write(unit=varbc_synop_unit,fmt=stringn) 'T parameters updated : ',varbc_param_tl(:)
            end if
 
+           call wrf_dm_bcast_real( iv%varbc_synop%t%param(1:npred), npred )
+
        end if
 
        deallocate(varbc_param_tl)
@@ -151,6 +157,8 @@
 
                write(unit=varbc_synop_unit,fmt=stringn) 'Q parameters updated : ',varbc_param_tl(:)
            end if
+
+           call wrf_dm_bcast_real( iv%varbc_synop%q%param(1:npred), npred )
 
        end if
 

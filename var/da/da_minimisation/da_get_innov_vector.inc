@@ -238,7 +238,7 @@ subroutine da_get_innov_vector (it, num_qcstat_conv, ob, iv, grid, config_flags)
    end if
 
    if (.not. anal_type_verify .and. use_varbc_synop) then
-       call da_varbc_synop_direct(iv,ob)
+       call da_varbc_synop_direct(iv)
        if (it == 1) call da_varbc_synop_precond(iv)
    end if
 

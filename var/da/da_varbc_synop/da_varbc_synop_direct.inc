@@ -1,4 +1,4 @@
-   subroutine da_varbc_synop_direct (iv,ob)
+   subroutine da_varbc_synop_direct (iv)
 
    !-----------------------------------------------!
    !  Apply bias correction to SYNOP innovations  !
@@ -7,7 +7,6 @@
    implicit none
 
    type (iv_type), intent(inout)   :: iv
-   type (y_type),  intent(inout)   :: ob
 
    real                            :: bc,bias
    real                            :: contri(5)
