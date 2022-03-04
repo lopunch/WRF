@@ -531,15 +531,10 @@
    if (use_varbc_tamdar) call da_varbc_tamdar_pred(iv, be, ob)
 
    if (use_synopobs .and. use_varbc_synop) then
-        call da_varbc_synop_init(iv)
+        call da_varbc_synop_init(iv, be)
    else
         use_varbc_synop = .false.
    end if
-   if (use_varbc_synop) then
-       iv%info(synop)%n1 = 1
-       iv%info(synop)%n2 = iv%info(synop)%nlocal
-       call da_varbc_synop_pred(grid, iv, be, ob)
-   end if    
 
 
    !---------------------------------------------------------------------------

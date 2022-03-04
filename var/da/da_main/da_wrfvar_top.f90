@@ -131,8 +131,7 @@ module da_wrfvar_top
 
    use da_varbc_tamdar, only : da_varbc_tamdar_init, da_varbc_tamdar_pred, &
                                da_varbc_tamdar_update
-   use da_varbc_synop,  only : da_varbc_synop_init, da_varbc_synop_pred, &
-                               da_varbc_synop_update
+   use da_varbc_synop,  only : da_varbc_synop_init, da_varbc_synop_update
 
    use da_wrf_interfaces
 

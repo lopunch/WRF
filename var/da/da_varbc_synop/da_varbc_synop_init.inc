@@ -1,4 +1,4 @@
-   subroutine da_varbc_synop_init (iv)
+   subroutine da_varbc_synop_init (iv, be)
 
    !-----------------------------------------------------!
    !  Initialize Varbc for SYNOP from VARBC_SYNOP.tbl  !
@@ -7,6 +7,7 @@
    implicit none
 
    type (iv_type), intent(inout)   :: iv
+   type (be_type), intent(inout)   :: be
 
    integer, parameter              :: nmaxpred = 3  ! 1,Hobs-Hter,Tsk-T2 for t
                                                     ! 1,spd,ln(znt)      for u, v
@@ -14,10 +15,15 @@
 
    integer                         :: npred, num_stn
    integer                         :: iunit,i
+   integer                         :: ipred
+   integer                         :: jsp_start,size_jsp
 
    logical                         :: ifexist_table
    character(len=120)              :: filename
 
+
+   size_jsp  = 0
+   jsp_start = be%cv%size_jb + be%cv%size_je + be%cv%size_jp + be%cv%size_js + be%cv%size_jl + be%cv%size_jt
 
    if (trace_use) call da_trace_entry("da_varbc_synop_init")
    
@@ -148,6 +154,44 @@
                     'Could not find VARBC_SYNOP.tbl file. VARBC_SYNOP is switched off.'
 
    end if
+
+   if(use_varbc_synop .and. rootproc) then
+
+       !u wind
+
+       do ipred = 1, iv%varbc_synop%u%npred 
+          size_jsp = size_jsp + 1
+          iv%varbc_synop%u%index(ipred) = jsp_start + size_jsp
+          iv%varbc_synop%u%vtox(ipred,ipred) = 1.0
+       end do
+
+       !v wind
+
+       do ipred = 1, iv%varbc_synop%v%npred 
+          size_jsp = size_jsp + 1
+          iv%varbc_synop%v%index(ipred) = jsp_start + size_jsp
+          iv%varbc_synop%v%vtox(ipred,ipred) = 1.0
+       end do
+
+       !temperature
+
+       do ipred = 1, iv%varbc_synop%t%npred 
+          size_jsp = size_jsp + 1
+          iv%varbc_synop%t%index(ipred) = jsp_start + size_jsp
+          iv%varbc_synop%t%vtox(ipred,ipred) = 1.0
+       end do
+
+       !qvapor
+
+       do ipred = 1, iv%varbc_synop%q%npred 
+          size_jsp = size_jsp + 1
+          iv%varbc_synop%q%index(ipred) = jsp_start + size_jsp
+          iv%varbc_synop%q%vtox(ipred,ipred) = 1.0
+       end do
+
+       be % cv % size_jsp = size_jsp
+   end if
+
 
    if (trace_use) call da_trace_exit("da_varbc_synop_init")
 
