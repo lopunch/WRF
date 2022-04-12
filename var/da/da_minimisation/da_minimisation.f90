@@ -131,7 +131,8 @@ module da_minimisation
    use da_varbc_tamdar, only : da_varbc_tamdar_tl,da_varbc_tamdar_adj, &
                                da_varbc_tamdar_direct,da_varbc_tamdar_precond
    use da_varbc_synop, only : da_varbc_synop_tl,da_varbc_synop_adj, &
-                               da_varbc_synop_direct,da_varbc_synop_precond
+                               da_varbc_synop_direct,da_varbc_synop_precond, &
+                               da_varbc_synop_pred
 
 #if defined(RTTOV) || defined(CRTM)
    use da_radiance, only : da_calculate_grady_rad, da_write_filtered_rad, &

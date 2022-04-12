@@ -312,12 +312,6 @@ subroutine da_get_innov_vector_synop( it,num_qcstat_conv, grid, ob, iv)
    if (check_buddy) call da_check_buddy_synop(iv, ob, grid%dx, it)
 
 
-   !--------------------------------------------------------------------
-   ! [6.0] Determine VarBC predictors
-   !--------------------------------------------------------------------
-
-   if ( use_varbc_synop ) &
-      call da_varbc_synop_pred(grid, iv, ob)
  !
    deallocate (model_u)
    deallocate (model_v)
